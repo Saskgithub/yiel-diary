@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- App Icon & Home Screen Rules -->
+    <title>yiel's</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="yiel's">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/bubbles/200/heart.png">
+
+    <style>
+        :root {
+            --bg-grad: linear-gradient(135deg, #e9d5ff 0%, #fbcfe8 100%);
+            --accent: #c084fc;
+            --entry-bg: rgba(255, 255, 255, 0.85);
+            --text: #581c87;
+            --border: #ddd6fe;
+            --base-font: 16px;
+            --bubble-bg: rgba(255, 255, 255, 0.98);
+            --bubble-text: #581c87;
+        }
+
+        /* --- THEME VARIANTS --- */
+        .theme-lavender-pink { --bg-grad: linear-gradient(135deg, #ddd6fe 0%, #fae8ff 100%); --accent: #a78bfa; --text: #4c1d95; --border: #c4b5fd; --bubble-bg: rgba(255, 255, 255, 0.98); --bubble-text: #4c1d95; }
+        .theme-pink-lavender { --bg-grad: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 100%); --accent: #f472b6; --text: #831843; --border: #fbcfe8; --bubble-bg: rgba(255, 255, 255, 0.98); --bubble-text: #831843; }
+        .theme-bratz { --bg-grad: linear-gradient(135deg, #000000, #1a1a1a); --accent: #bef264; --entry-bg: rgba(30, 30, 30, 0.9); --text: #bef264; --border: #3f6212; --bubble-bg: #1e1e1e; --bubble-text: #bef264; }
+        .theme-dark { --bg-grad: linear-gradient(135deg, #111827, #1f2937); --accent: #9ca3af; --entry-bg: rgba(31, 41, 55, 0.9); --text: #f9fafb; --border: #374151; --bubble-bg: #1f2937; --bubble-text: #f3f4f6; }
+
+        body {
+            background: var(--bg-grad);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.4s ease, color 0.4s ease;
+            font-size: var(--base-font);
+            -webkit-touch-callout: none;
+            overscroll-behavior: none; 
+        }
+
+        .container { max-width: 600px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .cutesy-title { font-size: 1.8em; font-weight: 800; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+
+        .entry-box {
+            background: var(--entry-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            position: relative;
+            font-size: 1em; 
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        textarea {
+            width: 100%; border-radius: 15px; border: 1px solid var(--border);
+            padding: 15px; font-family: inherit; font-size: 0.9em; margin: 10px 0; 
+            outline: none; background: rgba(255,255,255,0.5); box-sizing: border-box;
+        }
+
+        .mood-badge { position: absolute; top: -12px; left: 20px; background: var(--accent); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; z-index: 10; }
+
+        .photo-stack-container {
+            position: relative;
+            height: 250px;
+            width: 200px;
+            margin: 25px auto;
+            cursor: pointer;
+        }
+
+        .stack-item {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border: 6px solid white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .action-links {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+
+        .action-btn { cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+        #settingsModal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; color: #333; padding: 30px; border-radius: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 1000; width: 85%; max-width: 350px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="theme-lavender-pink">
+
+<div class="container">
+    <header>
+        <div class="cutesy-title">Daily Moments</div>
+        <button class="btn" style="background:white; color:#333; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" onclick="toggleSettings()">⚙️</button>
+    </header>
+
+    <div id="lockScreen" class="entry-box" style="text-align: center;">
+        <h2 style="margin-top:0;">heyy kyutiee🤍</h2>
+        <p style="font-size: 0.9em; opacity: 0.8;">Enter the secret code to enter</p>
+        <input type="password" id="passCode" placeholder="Code..." style="padding:12px; border-radius:15px; border:1px solid #ddd; width: 80%; text-align: center; font-size: 1.1em;">
+        <br>
+        <button class="btn" style="margin-top:20px; width: 80%;" onclick="unlock()">Unlock Diary</button>
+    </div>
+
+    <div id="app" class="hidden">
+        <div class="entry-box">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>Mood:</span>
+                <select id="moodSelect" style="border-radius: 10px; padding: 5px; border: 1px solid var(--border);">
+                    <option value="💗">Lovely</option>
+                    <option value="🤩">Amazing</option>
+                    <option value="🥰">In Love</option>
+                    <option value="💅">Baddie</option>
+                    <option value="🫠">Mid</option>
+                    <option value="😔">Emo</option>
+                    <option value="🫨">Chaotic</option>
+                </select>
+            </div>
+            <textarea id="noteContent" placeholder="What's happening today, baby?"></textarea>
+            <input type="file" id="fileInput" multiple accept="image/*,video/*" style="font-size: 0.8em;">
+            <button class="btn" style="width: 100%; margin-top: 15px;" onclick="addEntry()">Post Memory</button>
+        </div>
+
+        <div id="feed"></div>
+
+        <!-- ADDITIONAL PERMANENT BLANK ENTRY MESSAGE -->
+        <div class="entry-box" style="border: 2px solid var(--accent); margin-bottom: 25px;">
+            <div class="mood-badge">💫</div>
+            <div style="white-space: pre-wrap; line-height: 1.6; font-weight: 500;">heyy babyyy! sinama ko na dito si kiarainee para may kasama ka wherever u goo yepyepyepp. ril talking kiara yan sha ma😛 mwuehehhe. and alsoo para makapag-bond din kayo😌. sumbong mo sa'kin 'pag  tinatarayan ka nyan😤😠😡kahit naka naka natin 'yan, wala shang rights para tarayan ka ma😤😠 pero good girl naman 'yan sha mwuehehehe. be good to each otherr aightt?? love love ko kayo parehoo pero mas love kitaaa raise to a zillionn mwaahhmwaahhhhh
+iloveeeyouuubabyyyy huwahwuahshahsh always palagi and forevahh🤍</div>
+            <div style="margin-top: 15px; font-size: 0.7em; opacity: 0.6; font-weight: bold;">Yours, Always</div>
+        </div>
+
+        <!-- PERMANENT FIRST ENTRY -->
+        <div class="entry-box" style="border: 2px solid var(--accent);">
+            <div class="mood-badge">💌</div>
+            <div style="white-space: pre-wrap; line-height: 1.6; font-weight: 500;">hey babyyy, i made this js for u. i want this to be your own safe space. a private space that’s only yours. you can put anything here, babyy. your thoughts, your random moments, the happiest parts of your day and even the most chaotic ones. kahit simple lang yan or even the things you don’t usually say out loud.
+i really want you to use this to document your life, baby. like kahit simple things lang, ilayag mo here. then someday, you can go back to it and realize how far you’ve comee. i want you to have something you can always look back on, something that holds your memories.
+and i hope na every time you open this, napapangiti ka. js a small reminder na you’re always loved, always alwayss.
+
+happiest birthday ulit, babyyy!! you deserve all the good things in this world, as in lahattt. i’ll always want the best for you, and i’ll always be here for you no matter whatt. i lovee youu palagiii, always every dayy mwaahhmwaahhmwaahhh😚😚</div>
+            <div style="margin-top: 15px; font-size: 0.7em; opacity: 0.6; font-weight: bold;">Yours, Always</div>
+        </div>
+    </div>
+</div>
+
+<div id="settingsModal">
+    <h3 style="margin-top:0">Personalize 🎀</h3>
+    <p><b>Text Size:</b></p>
+    <input type="range" min="14" max="28" value="16" style="width: 100%; accent-color: var(--accent);" oninput="updateFontSize(this.value)">
+    <p><b>Choose a Vibe:</b></p>
+    <button class="btn" style="width:100%; margin-bottom:8px; background:#ddd6fe; color:#4c1d95;" onclick="setTheme('theme-lavender-pink')">👾ferful</button>
+    <button class="btn" style="width:100%; margin-bottom:8px; background:#fce7f3; color:#831843;" onclick="setTheme('theme-pink-lavender')">🌸fenk </button>
+    <button class="btn" style="width:100%; margin-bottom:8px; background:#111; color:#bef264;" onclick="setTheme('theme-bratz')">🧪 Bratz</button>
+    <button class="btn" style="width:100%; background:#333;" onclick="setTheme('theme-dark')">🌙 Dark Mode</button>
+    <button class="btn" style="width: 100%; margin-top: 25px; background: #eee; color: #333;" onclick="toggleSettings()">Close</button>
+</div>
+
+<!-- KIARA COMPANION CONTAINER -->
+<div id="kiara-container" style="position: fixed; bottom: 30px; left: 30px; z-index: 9999; display: flex; flex-direction: column; align-items: center; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; display: none; -webkit-touch-callout: none;">
+    
+    <div id="kiara-bubble" style="visibility: hidden; opacity: 0; background: var(--bubble-bg); backdrop-filter: blur(8px); border: 2px solid var(--accent); padding: 14px 18px; border-radius: 22px; color: var(--bubble-text); width: 220px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.12); position: fixed; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 10001; pointer-events: none; box-sizing: border-box;">
+        <div style="font-weight: 800; color: var(--accent); margin-bottom: 6px; font-size: 0.65em; letter-spacing: 1px; text-transform: uppercase;">Kiara:</div>
+        <div id="kiara-speech-text" style="font-style: italic; line-height: 1.4; font-weight: 500; font-size: 0.9em;">Loading live note... 🤍</div>
+        <div id="bubble-arrow" style="position: absolute; width: 0; height: 0; border: 8px solid transparent;"></div>
+    </div>
+
+    <!-- Live Unread Pulse Indicator Dot -->
+    <div id="kiaraUnreadDot" style="position: absolute; top: 12px; right: 12px; width: 14px; height: 14px; background: #22c55e; border: 2.5px solid white; border-radius: 50%; z-index: 10003; display: none; animation: unreadPulse 1.5s infinite;"></div>
+
+    <!-- Content Area -->
+    <div style="position: relative; width: 120px; height: 120px; pointer-events: none; -webkit-touch-callout: none; animation: kiaraBreathe 2.5s ease-in-out infinite;">
+        <img id="kiara-img" src="pet-base.png" alt="Kiara" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;" oncontextmenu="return false;">
+    </div>
+</div>
+
+<!-- Fullscreen Pop Overlay -->
+<div id="kiara-pop-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;" onclick="handleOverlayCardClick(event)">
+    
+    <div id="gift-box-wrapper" style="display: none; position: relative; width: 200px; height: 200px; cursor: pointer; text-align: center;" onclick="unwrapGiftSequence(event)">
+        <div id="gift-lid" style="font-size: 7rem; position: absolute; top: -25px; left: 0; width: 100%; z-index: 3; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">💝</div>
+        <div id="gift-base" style="font-size: 7rem; position: absolute; top: 15px; left: 0; width: 100%; z-index: 1;">🎁</div>
+    </div>
+
+    <div id="kiara-pop-card" style="transform: scale(0.7); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: none; flex-direction: column; align-items: center; max-width: 85%; width: 100%;">
+        <img id="kiara-pop-avatar" src="pet-base.png" style="width: 260px; height: 260px; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3)); margin-bottom: -20px; z-index: 2; pointer-events: none; -webkit-touch-callout: none;">
+        <div style="background: white; border-radius: 30px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 3px solid var(--accent); text-align: center; width: 100%; box-sizing: border-box; position: relative; z-index: 1;">
+            
+            <div id="flowerHeaderDoodle" style="font-size: 3.8rem; margin-bottom: 5px; display: none; animation: doodleWave 3s ease-in-out infinite;">🌸</div>
+            <div id="defaultEnvelopeDoodle" style="font-size: 2.2rem; margin-bottom: 10px;">💌</div>
+
+            <div id="kiara-pop-header-title" style="font-weight: 800; color: var(--accent); font-size: 0.75em; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;">from softieepatootiee:</div>
+            <div id="kiara-pop-text" style="font-family: inherit; font-size: 1.1em; line-height: 1.6; color: #333; font-weight: 500; font-style: italic; white-space: pre-wrap;"></div>
+            <div id="kiara-pop-footer-hint" style="margin-top: 15px; font-size: 0.75em; color: #aaa;">(Tap anywhere to close)</div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes kiaraBreathe {
+    0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 6px 8px rgba(0,0,0,0.12)); }
+    50% { transform: scale(1.03) translateY(-3px); filter: drop-shadow(0 12px 18px rgba(244,114,182,0.2)); }
+}
+@keyframes unreadPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+@keyframes doodleWave {
+    0%, 100% { transform: rotate(-4deg) scale(1); }
+    50% { transform: rotate(4deg) scale(1.05); }
+}
+.kiara-tapping { transform: scale(0.88) !important; transition: transform 0.1s ease !important; }
+
+.floating-heart-particle {
+    position: fixed;
+    z-index: 100002;
+    pointer-events: none;
+    font-size: 1rem; 
+    transition: transform 1s cubic-bezier(0.08, 0.8, 0.2, 1), opacity 1s ease-out;
+    opacity: 1;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.soft-confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    z-index: 100005;
+    pointer-events: none;
+    animation: confettiFall 2.8s cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
+}
+@keyframes confettiFall {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); opacity: 0; }
+}
+</style>
+
+<script>
+    // SUPABASE INTEGRATION CREDENTIALS
+    const SUPABASE_URL = "https://nbfkdvsbmkgpvihwyxpc.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_xr3QefRvtPe8xN1Q-82o0g_HFnsbqo2";
+
+    const fallbackNotesFromKiara = [
+        "meow~ bantay ko po space natin momi habang busy pa ikaww",
+        "purrr... ang kyutt kyutt talaga ni momii palgii,  write well poo",
+        "meow~~ kiss mo po kami ni momi later, plss🥺"
+    ];
+
+    const flowerDoodlesLookup = {
+        'rose': '🌹✨',
+        'sunflower': '🌻☀️',
+        'tulip': '🌷💖',
+        'bouquet': '💐✨'
+    };
+
+    let db;
+    const request = indexedDB.open("YielDiaryDB", 1);
+    request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("entries", { keyPath: "id" }); };
+    request.onsuccess = (e) => { db = e.target.result; };
+
+    function unlock() {
+        const code = document.getElementById('passCode').value;
+        if(code === "ILY1205") {
+            document.getElementById('lockScreen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            render(); 
+            initializeKiaraCompanion();
+        } else { alert("engkk, wrong ka po babyy"); document.getElementById('passCode').value = ''; }
+    }
+
+    function updateFontSize(size) { document.documentElement.style.setProperty('--base-font', size + 'px'); }
+
+    async function addEntry() {
+        const text = document.getElementById('noteContent').value;
+        const mood = document.getElementById('moodSelect').value;
+        const files = document.getElementById('fileInput').files;
+        if(!text.trim()) return alert("Write something first poo");
+        const media = [];
+        for(let f of Array.from(files).slice(0, 10)) { media.push(await toBase64(f)); }
+        const entry = { id: Date.now(), date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }), timestamp: Date.now(), content: text, mood: mood, attachments: media };
+        const tx = db.transaction("entries", "readwrite");
+        tx.objectStore("entries").add(entry);
+        tx.oncomplete = () => { document.getElementById('noteContent').value = ''; document.getElementById('fileInput').value = ''; render(); };
+    }
+
+    function render() {
+        const feed = document.getElementById('feed');
+        feed.innerHTML = '';
+        const tx = db.transaction("entries", "readonly");
+        const store = tx.objectStore("entries");
+        const request = store.getAll();
+        request.onsuccess = () => {
+            const entries = request.result.sort((a,b) => b.id - a.id);
+            entries.forEach(e => {
+                const card = document.createElement('div');
+                card.className = 'entry-box';
+                const canEdit = (Date.now() - e.timestamp) < (3 * 60 * 60 * 1000);
+                let photoHtml = '';
+                if(e.attachments && e.attachments.length > 0) {
+                    photoHtml = `<div class="photo-stack-container" onclick="cyclePhotos(this)">`;
+                    e.attachments.forEach((imgData, index) => {
+                        photoHtml += `<img src="${imgData}" class="stack-item" style="z-index:${e.attachments.length - index}; transform: rotate(${Math.floor(Math.random() * 14 - 7)}deg);">`;
+                    });
+                    photoHtml += `</div><p style="text-align:center; font-size:0.7em; opacity:0.5;">(Tap photos to flip)</p>`;
+                }
+                card.innerHTML = `<div class="mood-badge">${e.mood}</div><div style="white-space: pre-wrap; line-height: 1.6;">${e.content}</div>${photoHtml}<div style="margin-top: 15px; font-size: 0.7em; opacity: 0.6; font-weight: bold;">${e.date}</div><div class="action-links">${canEdit ? `<span class="action-btn" onclick="editEntry(${e.id})">Edit</span>` : ''}<span class="action-btn" style="color:#ff6b6b;" onclick="deleteEntry(${e.id})">Delete</span></div>`;
+                feed.appendChild(card);
+            });
+        };
+    }
+
+    function cyclePhotos(container) {
+        const items = container.querySelectorAll('.stack-item');
+        if(items.length <= 1) return;
+        const topItem = items[0];
+        topItem.style.transform = 'translateX(160%) rotate(25deg)'; topItem.style.opacity = '0';
+        setTimeout(() => {
+            container.appendChild(topItem); topItem.style.opacity = '1';
+            const newItems = container.querySelectorAll('.stack-item');
+            newItems.forEach((img, idx) => { img.style.zIndex = newItems.length - idx; img.style.transform = `rotate(${Math.floor(Math.random() * 14 - 7)}deg)`; });
+        }, 400);
+    }
+
+    function editEntry(id) {
+        const tx = db.transaction("entries", "readonly");
+        tx.objectStore("entries").get(id).onsuccess = (e) => {
+            const entry = e.target.result;
+            const newText = prompt("Edit your memory:", entry.content);
+            if(newText) { entry.content = newText; const utx = db.transaction("entries", "readwrite"); utx.objectStore("entries").put(entry); utx.oncomplete = () => render(); }
+        };
+    }
+
+    function deleteEntry(id) {
+        if(confirm("Delete this memory forever?")) { const tx = db.transaction("entries", "readwrite"); tx.objectStore("entries").delete(id); tx.oncomplete = () => render(); }
+    }
+
+    function toggleSettings() { const m = document.getElementById('settingsModal'); m.style.display = (m.style.display === 'block') ? 'none' : 'block'; }
+    function setTheme(t) { document.body.className = t; }
+    const toBase64 = file => new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); });
+
+    // --- INTERACTIVE ENGINE, ABSOLUTE SCREEN-BOUND BUBBLE & AUTOMATED NOTIFICATIONS ---
+    let bubbleTimeout;
+    let isDraggingRealized = false;
+    let longPressTimer;
+    let isLongPressedTriggered = false;
+    
+    let currentActiveNotesKiara = [];
+    let notePointerKiara = 0;
+    
+    let tapTimestampsLog = [];
+    let introStepPointer = 0;
+    let isIntroActiveMode = false;
+    let isGiftPhaseActive = false;
+
+    const introScriptContent = [
+        "heyy momiii! its mee kiaraa! finallyy, we can be together na😻",
+        "momi u have a messagee! hold me down anytime to read what momii sas left for u!🥰"
+    ];
+
+    function initializeKiaraCompanion() {
+        const container = document.getElementById('kiara-container');
+        container.style.display = "flex";
+        
+        if (!localStorage.getItem('hasMetKiaraV5')) {
+            triggerGiftBoxIntroPlacement();
+        } else {
+            // true parameter forces the notification bubble to pop up automatically if a message is unread
+            fetchAllLiveDatabaseData(true);
+        }
+        
+        setupDraggableKiara();
+    }
+
+    function triggerGiftBoxIntroPlacement() {
+        isIntroActiveMode = true;
+        isGiftPhaseActive = true;
+        introStepPointer = 0;
+        
+        document.getElementById('flowerHeaderDoodle').style.display = "none";
+        document.getElementById('defaultEnvelopeDoodle').style.display = "block";
+        document.getElementById('defaultEnvelopeDoodle').innerText = "";
+        document.getElementById('kiara-pop-header-title').innerText = "Surprise Guest🫶";
+        document.getElementById('kiara-pop-footer-hint').innerText = "(Tap anywhere to continue)";
+        document.getElementById('kiara-pop-text').innerText = introScriptContent[0];
+        
+        document.getElementById('kiara-pop-card').style.display = "none";
+        document.getElementById('gift-box-wrapper').style.display = "block";
+        
+        const overlay = document.getElementById('kiara-pop-overlay');
+        overlay.style.visibility = "visible";
+        overlay.style.opacity = "1";
+    }
+
+    function unwrapGiftSequence(event) {
+        event.stopPropagation();
+        if (!isGiftPhaseActive) return;
+        isGiftPhaseActive = false;
+
+        const lid = document.getElementById('gift-lid');
+        const base = document.getElementById('gift-base');
+
+        lid.style.transform = "translateY(-45px) translateX(30px) rotate(35deg) scale(0.9)";
+        setTimeout(() => {
+            lid.style.opacity = "0";
+            base.style.transform = "scale(0.8)";
+            base.style.opacity = "0";
+        }, 300);
+
+        setTimeout(() => {
+            document.getElementById('gift-box-wrapper').style.display = "none";
+            const card = document.getElementById('kiara-pop-card');
+            card.style.display = "flex";
+            
+            setTimeout(() => { card.style.transform = "scale(1)"; }, 50);
+            spawnElegantSoftConfetti();
+        }, 450);
+    }
+
+    function spawnElegantSoftConfetti() {
+        const colors = ["#f472b6", "#c084fc", "#fbcfe8", "#ddd6fe", "#bef264", "#ffffff"];
+        for(let i = 0; i < 45; i++) {
+            const p = document.createElement("div");
+            p.className = "soft-confetti-piece";
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            p.style.left = (window.innerWidth / 2) + "px";
+            p.style.top = (window.innerHeight / 2 - 80) + "px";
+            
+            p.style.setProperty("--cx", (Math.random() * 450 - 225) + "px");
+            p.style.setProperty("--cy", (Math.random() * 550 - 150) + "px");
+            p.style.setProperty("--cr", (Math.random() * 720 - 360) + "deg");
+            
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 2800);
+        }
+    }
+
+    function handleOverlayCardClick(event) {
+        if (isGiftPhaseActive) return;
+
+        if (isIntroActiveMode) {
+            introStepPointer++;
+            if (introStepPointer < introScriptContent.length) {
+                document.getElementById('kiara-pop-text').innerText = introScriptContent[introStepPointer];
+                if (introStepPointer === introScriptContent.length - 1) {
+                    document.getElementById('kiara-pop-footer-hint').innerText = "(Tap anywhere to open your space)";
+                }
+            } else {
+                isIntroActiveMode = false;
+                localStorage.setItem('hasMetKiaraV5', 'true');
+                closeKiaraPop();
+                fetchAllLiveDatabaseData(true); 
+            }
+        } else {
+            closeKiaraPop();
+        }
+    }
+
+    function setupDraggableKiara() {
+        const el = document.getElementById('kiara-container');
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        el.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            isDragging = true;
+            isDraggingRealized = false;
+            isLongPressedTriggered = false;
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const computedStyle = window.getComputedStyle(el);
+            initialX = parseInt(computedStyle.left) || 30;
+            initialY = parseInt(computedStyle.top) || (window.innerHeight - 150);
+            
+            longPressTimer = setTimeout(() => {
+                if (!isDraggingRealized && isDragging && !isIntroActiveMode) {
+                    isLongPressedTriggered = true;
+                    isDragging = false;
+                    triggerKiaraPop();
+                }
+            }, 600);
+
+            el.setPointerCapture(e.pointerId);
+        }, { passive: false });
+
+        el.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+                isDraggingRealized = true; 
+                clearTimeout(longPressTimer);
+                hideBubble();
+            }
+            
+            if (isDraggingRealized) {
+                el.style.bottom = 'auto';
+                el.style.right = 'auto';
+                el.style.left = `${initialX + deltaX}px`;
+                el.style.top = `${initialY + deltaY}px`;
+            }
+        }, { passive: false });
+
+        el.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(longPressTimer);
+            if (!isDragging) return;
+            isDragging = false;
+            el.releasePointerCapture(e.pointerId);
+            
+            if (!isDraggingRealized && !isLongPressedTriggered) {
+                handleKiaraTaps(e);
+            }
+        }, { passive: false });
+    }
+
+    function handleKiaraTaps(e) {
+        if (isIntroActiveMode) return;
+
+        const now = Date.now();
+        tapTimestampsLog.push(now);
+        tapTimestampsLog = tapTimestampsLog.filter(t => now - t < 1000);
+
+        const img = document.getElementById('kiara-img');
+        img.classList.add('kiara-tapping');
+        setTimeout(() => img.classList.remove('kiara-tapping'), 80);
+
+        if (tapTimestampsLog.length > 2) {
+            spawnDynamicThemeHearts(e.clientX, e.clientY);
+            clearTimeout(bubbleTimeout);
+            bubbleTimeout = setTimeout(hideBubble, 3000);
+            return; 
+        }
+
+        if (currentActiveNotesKiara.length > 0) {
+            notePointerKiara = (notePointerKiara + 1) % currentActiveNotesKiara.length;
+            document.getElementById('kiara-speech-text').innerText = currentActiveNotesKiara[notePointerKiara];
+        }
+        
+        displayBubbleInteractive();
+    }
+
+    function spawnDynamicThemeHearts(originX, originY) {
+        const theme = document.body.className || "theme-lavender-pink";
+        let heartsPool = ["❤️", "🩷", "🥰", "💗", "💕", "😍"];
+        
+        if (theme === "theme-bratz") {
+            heartsPool = ["💚", "🥰", "💚", "💚", "😍", "💚"];
+        } else if (theme === "theme-dark") {
+            heartsPool = ["🖤", "🥰", "🤍", "🖤", "😍", "🤍"];
+        }
+
+        for (let i = 0; i < 4; i++) {
+            const particle = document.createElement("div");
+            particle.className = "floating-heart-particle";
+            particle.innerText = heartsPool[Math.floor(Math.random() * heartsPool.length)];
+            
+            particle.style.left = originX + "px";
+            particle.style.top = originY + "px";
+            
+            document.body.appendChild(particle);
+            window.getComputedStyle(particle).opacity;
+
+            const targetX = (Math.random() * 100 - 50);
+            const targetY = (-Math.random() * 80 - 30);
+            const targetRot = (Math.random() * 180 - 90);
+
+            particle.style.transform = `translate(${targetX}px, ${targetY}px) scale(1.1) rotate(${targetRot}deg)`;
+            particle.style.opacity = "0";
+            
+            setTimeout(() => particle.remove(), 1000);
+        }
+    }
+
+    // --- ABSOLUTE VIEWPORT SCREEN-BOUND BUBBLE ENGINE ---
+    function adjustBubblePosition() {
+        const container = document.getElementById('kiara-container');
+        const bubble = document.getElementById('kiara-bubble');
+        const arrow = document.getElementById('bubble-arrow');
+        
+        if (!container || !bubble) return;
+
+        const kRect = container.getBoundingClientRect();
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        const bubbleWidth = 220;
+        // Estimate layout height if not fully calculated yet
+        const bubbleHeight = bubble.offsetHeight || 85; 
+
+        // 1. Calculate Default Placement (Centered horizontally above Kiara's head)
+        let finalLeft = kRect.left + (kRect.width / 2) - (bubbleWidth / 2);
+        let finalTop = kRect.top - bubbleHeight - 16;
+        let isBubblePlacedBelow = false;
+
+        // 2. Clamp Left & Right Screen Viewport Constraints (Keep inside 12px padding)
+        const minAllowedLeft = 12;
+        const maxAllowedLeft = screenWidth - bubbleWidth - 12;
+
+        if (finalLeft < minAllowedLeft) {
+            finalLeft = minAllowedLeft;
+        } else if (finalLeft > maxAllowedLeft) {
+            finalLeft = maxAllowedLeft;
+        }
+
+        // 3. Handle Top Edge Collision Constraining
+        if (finalTop < 12) {
+            // Push bubble down below her body box if she goes too high up on-screen
+            finalTop = kRect.top + kRect.height + 16;
+            isBubblePlacedBelow = true;
+        }
+
+        // 4. Handle Bottom Edge Collision Constraining
+        if (isBubblePlacedBelow && (finalTop + bubbleHeight > screenHeight - 12)) {
+            // Absolute worst case fallback if trapped: reset safely above regardless of overlaying header
+            finalTop = kRect.top - bubbleHeight - 16;
+            isBubblePlacedBelow = false;
+        }
+
+        // Apply updated coordinates
+        bubble.style.left = `${finalLeft}px`;
+        bubble.style.top = `${finalTop}px`;
+
+        // 5. Point the arrow directly at her head relative to the bubble's layout offset
+        const targetHeadX = kRect.left + (kRect.width / 2);
+        let arrowRelativeLeft = targetHeadX - finalLeft - 8; // 8px for half of the 16px wide border arrow
+        
+        // Safety bounds for arrow attachment inside bubble radius
+        arrowRelativeLeft = Math.max(16, Math.min(bubbleWidth - 32, arrowRelativeLeft));
+
+        if (!isBubblePlacedBelow) {
+            arrow.style.cssText = `
+                position: absolute;
+                width: 0;
+                height: 0;
+                border: 8px solid transparent;
+                border-top-color: var(--accent);
+                bottom: -16px;
+                left: ${arrowRelativeLeft}px;
+            `;
+        } else {
+            arrow.style.cssText = `
+                position: absolute;
+                width: 0;
+                height: 0;
+                border: 8px solid transparent;
+                border-bottom-color: var(--accent);
+                top: -16px;
+                left: ${arrowRelativeLeft}px;
+            `;
+        }
+
+        bubble.style.visibility = "visible";
+        bubble.style.opacity = "1";
+    }
+
+    function hideBubble() {
+        const bubble = document.getElementById('kiara-bubble');
+        if(bubble) {
+            bubble.style.opacity = "0";
+            bubble.style.visibility = "hidden";
+        }
+    }
+
+    function triggerKiaraPop() {
+        const msg = localStorage.getItem('latestLiveNoteMax') || "";
+        
+        if (!msg.trim()) {
+            document.getElementById('kiara-pop-header-title').innerText = "Kiara:";
+            document.getElementById('kiara-pop-text').innerText = "No message from momii yet... stay tuned poo! 🤍";
+            document.getElementById('flowerHeaderDoodle').style.display = "none";
+            document.getElementById('defaultEnvelopeDoodle').style.display = "block";
+            document.getElementById('defaultEnvelopeDoodle').innerText = "🐾";
+        } else {
+            document.getElementById('kiara-pop-header-title').innerText = "from softieepatootiee:";
+            document.getElementById('kiara-pop-text').innerHTML = msg;
+            
+            const flowerCode = localStorage.getItem('latestFlowerType') || 'none';
+            const flowerHeader = document.getElementById('flowerHeaderDoodle');
+            const envelopeHeader = document.getElementById('defaultEnvelopeDoodle');
+
+            if (flowerCode !== 'none' && flowerDoodlesLookup[flowerCode]) {
+                flowerHeader.innerText = flowerDoodlesLookup[flowerCode];
+                flowerHeader.style.display = "block";
+                envelopeHeader.style.display = "none";
+            } else {
+                flowerHeader.style.display = "none";
+                envelopeHeader.style.display = "block";
+                envelopeHeader.innerText = "💌";
+            }
+        }
+
+        document.getElementById('kiara-pop-footer-hint').innerText = "(Tap anywhere to close)";
+        document.getElementById('gift-box-wrapper').style.display = "none";
+        
+        const card = document.getElementById('kiara-pop-card');
+        card.style.display = "flex";
+
+        const overlay = document.getElementById('kiara-pop-overlay');
+        overlay.style.visibility = "visible";
+        overlay.style.opacity = "1";
+        setTimeout(() => { card.style.transform = "scale(1)"; }, 50);
+
+        document.getElementById('kiaraUnreadDot').style.display = "none";
+        syncMainMessageAsSeen();
+    }
+
+    async function syncMainMessageAsSeen() {
+        if(SUPABASE_URL === "YOUR_SUPABASE_URL") return;
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/messages?id=eq.1`, {
+                method: "PATCH",
+                headers: { 
+                    "apikey": SUPABASE_KEY, 
+                    "Authorization": `Bearer ${SUPABASE_KEY}`, 
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+                body: JSON.stringify({ seen: true })
+            });
+        } catch(e) { console.log("State clean pass."); }
+    }
+
+    function closeKiaraPop() {
+        const overlay = document.getElementById('kiara-pop-overlay');
+        const card = document.getElementById('kiara-pop-card');
+        card.style.transform = "scale(0.7)";
+        overlay.style.opacity = "0";
+        setTimeout(() => { 
+            overlay.style.visibility = "hidden"; 
+            card.style.display = "none";
+        }, 400);
+    }
+
+    async function fetchAllLiveDatabaseData(shouldOpenBubble = false) {
+        if(SUPABASE_URL === "YOUR_SUPABASE_URL") {
+            loadFallbackSystemCache(shouldOpenBubble);
+            return;
+        }
+
+        try {
+            const letterRes = await fetch(`${SUPABASE_URL}/rest/v1/messages?id=eq.1`, {
+                headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+            });
+            const letterData = await letterRes.json();
+            
+            let hasUnreadLetter = false;
+            if (letterData && letterData.length > 0) {
+                const mainLetter = letterData[0];
+                const msgText = mainLetter.text || "";
+                
+                localStorage.setItem('latestLiveNoteMax', msgText);
+                localStorage.setItem('latestFlowerType', (mainLetter.flower_type || "none").toLowerCase());
+                
+                if (msgText.trim() && !mainLetter.seen) {
+                    hasUnreadLetter = true;
+                    document.getElementById('kiaraUnreadDot').style.display = "block";
+                    // AUTO TRIGGER IMMEDIATELY ON LOAD STATE:
+                    shouldOpenBubble = true; 
+                } else {
+                    document.getElementById('kiaraUnreadDot').style.display = "none";
+                }
+            }
+
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const notesRes = await fetch(
+                `${SUPABASE_URL}/rest/v1/kiara_notes?created_at=gte.${twentyFourHoursAgo}&order=created_at.desc`, {
+                headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+            });
+            const notesData = await notesRes.json();
+
+            currentActiveNotesKiara = [];
+            
+            if (hasUnreadLetter) {
+                currentActiveNotesKiara.push("momi u have a messagee💌! check it out poo!");
+            }
+
+            if (notesData && notesData.length > 0) {
+                notesData.forEach(item => {
+                    if(item.note_text) currentActiveNotesKiara.push(item.note_text);
+                });
+            }
+
+            if (currentActiveNotesKiara.length === 0) {
+                currentActiveNotesKiara = [...fallbackNotesFromKiara];
+            }
+
+            // Lock target text indices dynamically
+            if (hasUnreadLetter) {
+                notePointerKiara = 0; // Lock priority warning index
+            }
+            
+            document.getElementById('kiara-speech-text').innerText = currentActiveNotesKiara[notePointerKiara % currentActiveNotesKiara.length];
+            
+            if (shouldOpenBubble) { 
+                // Delay slightly on initialization execution step to ensure height bounds render accurately
+                setTimeout(() => { displayBubbleInteractive(); }, 400); 
+            }
+
+        } catch (e) { 
+            loadFallbackSystemCache(shouldOpenBubble); 
+        }
+    }
+
+    function loadFallbackSystemCache(shouldOpenBubble) {
+        currentActiveNotesKiara = [...fallbackNotesFromKiara];
+        document.getElementById('kiara-speech-text').innerText = currentActiveNotesKiara[notePointerKiara % currentActiveNotesKiara.length];
+        if (shouldOpenBubble) { displayBubbleInteractive(); }
+    }
+
+    function displayBubbleInteractive() {
+        adjustBubblePosition();
+        clearTimeout(bubbleTimeout);
+        bubbleTimeout = setTimeout(hideBubble, 7000); 
+    }
+
+    // Auto layout tracking listener to handle seamless screen orientation shifts
+    window.addEventListener('resize', () => {
+        const bubble = document.getElementById('kiara-bubble');
+        if (bubble && window.getComputedStyle(bubble).opacity === "1") {
+            adjustBubblePosition();
+        }
+    });
+
+    setInterval(() => {
+        const container = document.getElementById('kiara-container');
+        if (container && container.style.display === 'flex' && !isIntroActiveMode) {
+            const isBubbleHidden = window.getComputedStyle(document.getElementById('kiara-bubble')).opacity === "0";
+            if (isBubbleHidden) {
+                fetchAllLiveDatabaseData(false); 
+            }
+        }
+    }, 15000);
+
+    // AUTOMATIC LOCK ON APP CLOSE / MINIMIZE
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            // Relock the screen immediately
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('kiara-container').style.display = 'none';
+            document.getElementById('lockScreen').classList.remove('hidden');
+            
+            // Clear the password field for safety
+            document.getElementById('passCode').value = '';
+            
+            // Hide Kiara's bubble so it resets clean next time
+            hideBubble();
+        }
+    });
+
+</script>
+
+</body>
+</html>
+
+
