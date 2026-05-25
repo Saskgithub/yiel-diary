@@ -894,6 +894,29 @@ happiest birthday ulit, babyyy!! you deserve all the good things in this world, 
         }
     });
 
+async function toggleStatus(onlineState) {
+  await supabase
+    .from('user_status')
+    .update({ is_online: onlineState })
+    .eq('id', 1);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  toggleStatus(true);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    toggleStatus(true);
+  } else {
+    toggleStatus(false);
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  toggleStatus(false);
+});
+
 </script>
 
 </body>
