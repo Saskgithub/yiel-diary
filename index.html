@@ -917,6 +917,38 @@ window.addEventListener('beforeunload', () => {
   toggleStatus(false);
 });
 
+async function toggleStatus(onlineState) {
+  await supabase
+    .from('user_status')
+    .update({ is_online: onlineState })
+    .eq('id', 1);
+}
+
+// Function to log the exact read time
+async function markMessageAsRead() {
+  await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .is('read_at', null); // Only updates if it hasn't been read yet
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  toggleStatus(true);
+  markMessageAsRead(); // This triggers the read receipt when she opens the site
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    toggleStatus(true);
+  } else {
+    toggleStatus(false);
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  toggleStatus(false);
+});
+
 </script>
 
 </body>
